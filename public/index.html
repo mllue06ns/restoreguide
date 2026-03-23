@@ -1,26 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RestoreGuide</title>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <h1>RestoreGuide</h1>
-  <button onclick="run()">Run test</button>
-  <pre id="out"></pre>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1 class="app-title">RestoreGuide</h1>
+        <p class="app-subtitle">Field restoration decision support</p>
+        <p class="app-module">Cape Flats Sand Fynbos module</p>
+      </div>
+    </header>
 
-  <script>
-    async function run() {
-      const res = await fetch('/api/mvp/cfsf/decision', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          nativeCover: 5,
-          acaciaCover: 60
-        })
-      });
-      const data = await res.json();
-      document.getElementById('out').textContent = JSON.stringify(data, null, 2);
-    }
-  </script>
+    <main class="app-main">
+      <section id="screen-input" class="screen active">
+        <div class="card">
+          <div class="card-header">
+            <h2>Site input</h2>
+            <p>Enter site conditions to generate restoration guidance.</p>
+          </div>
+
+          <form id="decision-form" class="form-grid">
+            <label>
+              <span>Years since clearing</span>
+              <input type="number" name="yearsSinceClearing" min="0" max="100" value="2" required />
+            </label>
+
+            <label>
+              <span>Years since fire</span>
+              <input type="number" name="yearsSinceFire" min="0" max="100" value="2" required />
+            </label>
+
+            <label>
+              <span>Acacia cover (%)</span>
+              <input type="number" name="acaciaCover" min="0" max="100" value="60" required />
+            </label>
+
+            <label>
+              <span>Native cover (%)</span>
+              <input type="number" name="nativeCover" min="0" max="100" value="8" required />
+            </label>
+
+            <label>
+              <span>Herbaceous weed cover (%)</span>
+              <input type="number" name="herbaceousCover" min="0" max="100" value="45" required />
+            </label>
+
+            <label>
+              <span>Disturbance</span>
+              <select name="disturbance" required>
+                <option value="low">Low</option>
+                <option value="moderate">Moderate</option>
+                <option value="high" selected>High</option>
+              </select>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="burnedSlash" checked />
+              <span>Burned slash present</span>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="isFragmented" checked />
+              <span>Fragmented site</span>
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Generate restoration guidance</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="screen-decision" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <h2>Site decision</h2>
+            <p>What this site needs, why, and what to do next.</p>
+          </div>
+
+          <div class="stack">
+            <div class="result-block">
+              <h3>Site state</h3>
+              <p id="site-state-text">—</p>
+            </div>
+
+            <div class="result-block">
+              <h3>Why this site is struggling</h3>
+              <ul id="barrier-list" class="clean-list"></ul>
+            </div>
+
+            <div class="result-block">
+              <h3>Recommended pathway</h3>
+              <p id="pathway-text">—</p>
+            </div>
+
+            <div class="result-block">
+              <h3>Realistic recovery target</h3>
+              <p id="target-text">—</p>
+            </div>
+
+            <div class="result-block">
+              <h3>Top actions</h3>
+              <div id="actions-list" class="action-list"></div>
+            </div>
+
+            <div class="screen-actions">
+              <button id="to-monitoring" class="btn btn-primary">Go to monitoring</button>
+              <button id="back-to-input-1" class="btn btn-secondary">Edit inputs</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-monitoring" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <h2>Monitoring</h2>
+            <p>Track trajectory and focus follow-up where it matters.</p>
+          </div>
+
+          <div class="stack">
+            <div class="result-block">
+              <h3>Current trajectory</h3>
+              <p id="trajectory-text">—</p>
+            </div>
+
+            <div class="result-block">
+              <h3>What to monitor next</h3>
+              <ul id="monitoring-list" class="clean-list"></ul>
+            </div>
+
+            <div class="result-block">
+              <h3>Next review window</h3>
+              <p id="review-window-text">—</p>
+            </div>
+
+            <div class="result-block">
+              <h3>Field checklist</h3>
+              <div id="checklist-list" class="checklist-list"></div>
+            </div>
+
+            <div class="screen-actions">
+              <button id="back-to-decision" class="btn btn-secondary">Back to decision</button>
+              <button id="back-to-input-2" class="btn btn-secondary">New site</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
 </body>
 </html>
