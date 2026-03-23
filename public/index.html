@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RestoreGuide</title>
+</head>
+<body>
+  <h1>RestoreGuide</h1>
+  <button onclick="run()">Run test</button>
+  <pre id="out"></pre>
+
+  <script>
+    async function run() {
+      const res = await fetch('/api/mvp/cfsf/decision', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          nativeCover: 5,
+          acaciaCover: 60
+        })
+      });
+      const data = await res.json();
+      document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
