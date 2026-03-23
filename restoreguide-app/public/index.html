@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RestoreGuide</title>
+</head>
+
+<body style="font-family: Arial; max-width: 600px; margin: auto; padding: 20px;">
+
+  <h1>RestoreGuide</h1>
+  <p><strong>Cape Flats Sand Fynbos module</strong></p>
+
+  <hr/>
+
+  <h2>Site Input</h2>
+
+  <label>Years since clearing:</label><br/>
+  <input id="yearsSinceClearing" type="number" value="2"/><br/><br/>
+
+  <label>Years since fire:</label><br/>
+  <input id="yearsSinceFire" type="number" value="2"/><br/><br/>
+
+  <label>Acacia cover (%):</label><br/>
+  <input id="acaciaCover" type="number" value="60"/><br/><br/>
+
+  <label>Native cover (%):</label><br/>
+  <input id="nativeCover" type="number" value="8"/><br/><br/>
+
+  <label>Herbaceous cover (%):</label><br/>
+  <input id="herbaceousCover" type="number" value="45"/><br/><br/>
+
+  <label>Disturbance:</label><br/>
+  <select id="disturbance">
+    <option value="low">Low</option>
+    <option value="moderate">Moderate</option>
+    <option value="high" selected>High</option>
+  </select><br/><br/>
+
+  <label>
+    <input id="burnedSlash" type="checkbox" checked/>
+    Burned slash present
+  </label><br/>
+
+  <label>
+    <input id="isFragmented" type="checkbox" checked/>
+    Fragmented site
+  </label><br/><br/>
+
+  <button onclick="run()">Generate Restoration Guidance</button>
+
+  <hr/>
+
+  <h2>Results</h2>
+
+  <p id="state"></p>
+  <p id="pathway"></p>
+  <p id="target"></p>
+
+  <h3>Why this site is struggling</h3>
+  <ul id="barriers"></ul>
+
+  <h3>Actions</h3>
+  <ul id="actions"></ul>
+
+  <h3>Trajectory</h3>
+  <p id="trajectory"></p>
+
+  <script>
+    async function run() {
+
+      const payload = {
+        yearsSinceClearing: Number(document.getElementById("yearsSinceClearing").value),
+        yearsSinceFire: Number(document.getElementById("yearsSinceFire").value),
+        acaciaCover: Number(document.getElementById("acaciaCover").value),
+        nativeCover: Number(document.getElementById("nativeCover").value),
+        herbaceousCover: Number(document.getElementById("herbaceousCover").value),
+        disturbance: document.getElementById("disturbance").value,
+        burnedSlash: document.getElementById("burnedSlash").checked,
+        isFragmented: document.getElementById("isFragmented").checked
+      };
+
+      const res = await fetch("/api/mvp/cfsf/decision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      document.getElementById("state").innerText = data.thresholdSummary;
+      document.getElementById("pathway").innerText =
+        data.pathwayLabel + " | " +
+        data.fireStrategyLabel + " | " +
+        data.reintroductionStrategyLabel;
+
+      document.getElementById("target").innerText = data.realisticTarget;
+      document.getElementById("trajectory").innerText = data.trajectoryLabel;
+
+      const barriers = document.getElementById("barriers");
+      barriers.innerHTML = "";
+      data.barrierMessages.forEach(b => {
+        const li = document.createElement("li");
+        li.innerText = b;
+        barriers.appendChild(li);
+      });
+
+      const actions = document.getElementById("actions");
+      actions.innerHTML = "";
+      data.actions.forEach(a => {
+        const li = document.createElement("li");
+        li.innerText = a.title + " — " + a.why;
+        actions.appendChild(li);
+      });
+    }
+  </script>
+
+</body>
+</html>
